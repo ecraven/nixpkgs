@@ -804,8 +804,6 @@ require_once(dirname(__FILE__) . '/lib/setup.php'); // Do not edit
         mkdir -p $out
         cp -r * $out
         cp ${moodleConfig} $out/config.php
-	echo $(whoami)
-	mkdir -p ${config.dataRoot}
       '';
   };
 
@@ -815,7 +813,8 @@ in
 
   extraConfig =
   ''
-    Alias / ${moodleRoot}/ # this should be config.urlPrefix instead of /
+    # this should be config.urlPrefix instead of /
+    Alias / ${moodleRoot}/
     <Directory ${moodleRoot}>
       DirectoryIndex index.php
     </Directory>
@@ -923,5 +922,14 @@ in
 	};
     };
   };
+
+  startupScript = pkgs.writeScript "moodle_startup.sh" ''
+  echo "Checking for existence of ${config.dataRoot}"
+  if [ ! -e "${config.dataRoot}" ]
+  then
+    mkdir -p "${config.dataRoot}"
+    chown ${serverInfo.serverConfig.user}.${serverInfo.serverConfig.group} "${config.dataRoot}"
+  fi
+  '';
 
 }
